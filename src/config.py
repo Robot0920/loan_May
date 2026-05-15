@@ -15,12 +15,29 @@ import os
 from pathlib import Path
 
 # ---- data paths ----
-DATA_DIR: Path = Path(
-    os.environ.get(
-        "DATA_DIR",
-        "/kaggle/input/home-credit-credit-risk-model-stability",
-    )
-)
+# Kaggle mounts competition data at one of two paths depending on how the dataset
+# was attached. We try both, then fall back to a local subsample path.
+_SLUG = "home-credit-credit-risk-model-stability"
+_CANDIDATE_DATA_DIRS = [
+    Path(f"/kaggle/input/{_SLUG}"),
+    Path(f"/kaggle/input/competitions/{_SLUG}"),
+    Path.cwd() / "data" / "raw" / _SLUG,  # local subsample fallback
+]
+
+
+def _resolve_data_dir() -> Path:
+    """Return the first existing candidate, or the env override, or the first
+    candidate (which will then fail loudly when used)."""
+    env = os.environ.get("DATA_DIR")
+    if env:
+        return Path(env)
+    for c in _CANDIDATE_DATA_DIRS:
+        if c.exists():
+            return c
+    return _CANDIDATE_DATA_DIRS[0]
+
+
+DATA_DIR: Path = _resolve_data_dir()
 TRAIN_DIR: Path = DATA_DIR / "parquet_files" / "train"
 TEST_DIR: Path = DATA_DIR / "parquet_files" / "test"
 
