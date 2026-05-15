@@ -1,0 +1,42 @@
+# Core data
+polars>=1.0.0
+pyarrow>=15.0.0
+pandas>=2.2.0
+numpy>=1.26.0
+
+# Modeling
+scikit-learn>=1.4.0
+lightgbm>=4.3.0
+xgboost>=2.0.0
+
+# Hyperparameter tuning
+optuna>=3.5.0
+
+# Explainability
+shap>=0.45.0
+
+# Fairness
+fairlearn>=0.10.0
+
+# Plotting
+matplotlib>=3.8.0
+seaborn>=0.13.0
+
+# Tracking (optional but recommended)
+mlflow>=2.10.0
+
+# Drift / monitoring (optional)
+evidently>=0.4.0
+
+# Serving (optional — for later phases)
+fastapi>=0.110.0
+pydantic>=2.6.0
+uvicorn>=0.27.0
+
+# Dev / testing
+pytest>=8.0.0
+pytest-cov>=4.1.0
+ruff>=0.3.0
+
+# Notebooks ↔ scripts (lets us version-control notebooks as .py files)
+jupytext>=1.16.0
