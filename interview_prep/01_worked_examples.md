@@ -243,13 +243,13 @@ The ML piece is the same default model — **what's different is the use of pred
 We're at the **first 10–15 minutes** of a 60-minute case. After this decomposition, the conversation goes:
 
 1. ✅ Goal decomposition (this note) — **done in first 10 min**
-2. ⬜ Data strategy: what we have / need / can't have — covered in `interview_prep/03_follow_up_prompts.md` Follow-up 1
-3. ⬜ Feature engineering tradeoffs — covered in Follow-up 2
-4. ⬜ Model family choice — covered in Follow-up 3
-5. ⬜ Evaluation framework — covered in Follow-up 4
-6. ⬜ Deployment & monitoring — covered in Follow-up 5
-7. ⬜ Compliance close — covered in Follow-up 6
-8. ⬜ Synthesis to CEO — to be drafted in `interview_prep/07_synthesis_template.md`
+2. ⬜ Data strategy: what we have / need / can't have — Methodology Part 2; lives in `deliverables/03_data_understanding.md`
+3. ⬜ Feature engineering tradeoffs — Methodology Part 3 (target) + project's `deliverables/04_model_build.md`
+4. ⬜ Model family choice — `deliverables/99_decisions_log.md` D02
+5. ⬜ Evaluation framework — `deliverables/02_problem_framing.md` (4-layer framework) + `04_model_build.md`
+6. ⬜ Deployment & monitoring — `deliverables/07_recommendation.md` (consolidated future deliverable)
+7. ⬜ Compliance close — `deliverables/06_compliance_governance.md` (consolidated future deliverable)
+8. ⬜ Synthesis to CEO — `deliverables/07_recommendation.md` final board memo section
 
 This note is the **bones** of stages 1–5 above. The **flesh** (architecture detail, evaluation rationale, deployment posture, fairness, compliance) gets filled in as I work through the actual project deliverables in `deliverables/`. **Don't try to fake the flesh before you've done the project work.** That's what the project is *for*.
 

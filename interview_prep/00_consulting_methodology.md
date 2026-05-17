@@ -498,7 +498,7 @@ If you hit 8 out of 10 in any case, you're operating at a senior level.
 | 45–55 min | Discuss what would constitute actionable insights | Part 5 |
 | 55–60 min | Synthesize: pyramid recommendation | Part 5 |
 
-This is the **bones**. The **flesh** (model architecture, evaluation framework, fairness, deployment, monitoring) lives in `interview_prep/03_follow_up_prompts.md` and `interview_prep/04_curveballs.md`. Master Parts 1–5 first; then layer the flesh.
+This is the **bones**. The **flesh** (model architecture, evaluation framework, fairness, deployment, monitoring) is built up by working the real project in `deliverables/` and `src/`. Master Parts 1–5 first; then earn the flesh by doing.
 
 ---
 
