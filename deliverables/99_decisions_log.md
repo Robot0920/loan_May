@@ -143,14 +143,64 @@ Each decision uses this structure:
 
 ---
 
+## D08 — Unified tax-data features (replaces individual tax registries)
+
+- **Date**: 2026-05-17
+- **Phase**: 2 (Data audit, runtime finding)
+- **Decision**: Do **not** use `tax_registry_a`, `tax_registry_b`, `tax_registry_c` columns individually as model features. Instead construct two unified features per applicant: `any_tax_data` (binary indicator: did ANY tax registry have a record for this applicant) and `tax_amount_max` (max across providers for any amount-valued tax column). Implementation lands in `src/features/` during Phase 3.
+- **Alternatives considered**:
+  1. Use all three tax registries as separate features — fails on stability because each is available only ~30 weeks out of 91; any model relying on one will degrade in the period that registry is absent
+  2. Drop all tax registry features — leaves substantial signal on the table; tax data is genuinely predictive of repayment capacity
+  3. Train a separate model per time period that uses whichever tax registry is active — operationally untenable; cannot deploy
+- **Rationale**: The Cell 10 audit confirmed a **provider-swap pattern**: tax_registry_c (weeks 5–40) → tax_registry_a (weeks 35–67) → tax_registry_b (weeks 67–91). Unifying across providers converts a high-drift signal into a low-drift composite. This is industry-standard treatment for multi-provider bureau data.
+- **Risk if wrong**: If the three tax providers actually measure subtly different things (e.g., different income types), unifying them loses precision. Mitigation: validate by comparing the unified feature's predictive power against each individual registry's predictive power on the windows where that registry is present.
+- **Reviewer / owner**: Senior DS
+- **Status**: Locked
+- **Related**: [03_data_understanding.md §B.4](03_data_understanding.md), Phase 3 feature engineering
+
+---
+
+## D09 — Drop credit_bureau_b from feature set
+
+- **Date**: 2026-05-17
+- **Phase**: 2 (Data audit, runtime finding)
+- **Decision**: Exclude all features derived from `credit_bureau_b_1` and `credit_bureau_b_2` from the modeling feature set.
+- **Alternatives considered**:
+  1. Include credit_bureau_b features with imputation for the 95% missing — adds noise + a stability risk for negligible signal
+  2. Include only as a binary "has credit_bureau_b" indicator — minor signal but adds little value and consumes model capacity
+- **Rationale**: Audit Cell 10 shows credit_bureau_b coverage maxes at **5.1% across the entire training period**. At this level of sparsity, any feature derived from credit_bureau_b is dominated by its absence pattern, not its value. The marginal lift is small and the stability risk (b's coverage could move from 5% to 0% in test) is not worth it.
+- **Risk if wrong**: If credit_bureau_b actually carries signal we're not seeing in the coverage data, we lose that. Acceptable trade given coverage levels.
+- **Reviewer / owner**: Senior DS
+- **Status**: Locked
+- **Related**: [03_data_understanding.md §B.4](03_data_understanding.md)
+
+---
+
+## D10 — Training-window cutoff at WEEK_NUM = 67 (or treat as regime change)
+
+- **Date**: 2026-05-17
+- **Phase**: 2 (Data audit, runtime finding)
+- **Decision**: Drop training rows with `WEEK_NUM > 67` from the primary training set, OR treat them as a separate regime requiring separate evaluation. Specifically: rows after WEEK_NUM=67 are confounded by (a) the tax_registry_a → tax_registry_b swap, and (b) the COVID-era right-censoring + forbearance regime that artificially suppresses default rates.
+- **Alternatives considered**:
+  1. Use the full data through WEEK_NUM=91 — model learns the wrong relationship in the COVID period (low default → easy to predict, but generalizes poorly to post-COVID inference)
+  2. Build a separate COVID-period model — operationally complex, low ROI for an engagement-scope decision
+  3. Time-weight the loss function down for COVID-period rows — softer version of dropping; requires tuning
+- **Rationale**: Two independent forces converge at WEEK_NUM ≈ 65–67: (a) the audit-confirmed tax provider swap, (b) the COVID-19 pandemic onset (~March 2020 corresponds to WEEK_NUM ~65). The combined regime change makes the late-period data fundamentally different from the early-period data. Training on it would teach the model patterns that don't generalize to normal-regime inference.
+- **Risk if wrong**: If the post-WEEK_NUM=67 period is actually representative of future inference conditions (e.g., if NovaLend operates in a permanent COVID-influenced regime), dropping it loses generalizable signal. Mitigation: report performance both with and without the cutoff; let the CRO inform whether the deployment context is normal-regime or COVID-influenced regime.
+- **Reviewer / owner**: Senior DS (lock), CRO (advisability of cutoff for production regime)
+- **Status**: Locked for engagement evaluation; CRO advisability flagged
+- **Related**: [03_data_understanding.md §B.3](03_data_understanding.md), industry precedent (OCC bulletin on COVID-era model development)
+
+---
+
 ## Reserved slots (decisions expected in upcoming phases)
 
-- D08 — Feature engineering aggregation strategy per depth (Phase 3)
-- D09 — Class imbalance handling method (Phase 4)
-- D10 — Cross-validation strategy (time-aware vs stratified k-fold) (Phase 4)
-- D11 — Hyperparameter tuning approach (Optuna config) (Phase 5)
-- D12 — Adverse action reason code methodology (SHAP top-N) (Phase 6)
-- D13 — Fairness mitigation method if 4/5 rule fails (Phase 6)
-- D14 — Production architecture (Phase 7)
-- D15 — Monitoring & retraining cadence (Phase 7)
-- D16 — Model card structure for handoff (Phase 8)
+- D11 — Feature engineering aggregation strategy per depth (Phase 3)
+- D12 — Class imbalance handling method (Phase 4)
+- D13 — Cross-validation strategy (time-aware vs stratified k-fold) (Phase 4)
+- D14 — Hyperparameter tuning approach (Optuna config) (Phase 5)
+- D15 — Adverse action reason code methodology (SHAP top-N) (Phase 6)
+- D16 — Fairness mitigation method if 4/5 rule fails (Phase 6)
+- D17 — Production architecture (Phase 7)
+- D18 — Monitoring & retraining cadence (Phase 7)
+- D19 — Model card structure for handoff (Phase 8)
